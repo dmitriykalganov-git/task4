@@ -43,26 +43,6 @@ std::string decimal_to_ip(int64_t decimal_ip) {
     return ss;
 }
 struct print_ip {
-/*	template <typename TT,
-		typename Fake =
-			typename std::enable_if<
-				!std::is_same<typename std::remove_reference<TT>::type,
-					int8_t>::value &&
-				!std::is_same<typename std::remove_reference<TT>::type,
-					int16_t>::value &&
-				!std::is_same<typename std::remove_reference<TT>::type,
-					int32_t>::value &&
-				!std::is_same<typename std::remove_reference<TT>::type,
-					int64_t>::value
-					,
-					void>::type
-				>
-	print_ip(TT &&value) : m_value{std::forward<TT>(value)} 
-	{
-      //    std::cout << value << std::endl;
-		  std::cout << value << std::endl;
-	};
-*/
 
 	template <
 		template <typename> typename Container,
