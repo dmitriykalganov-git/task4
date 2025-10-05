@@ -5,6 +5,7 @@
 #include <list>
 #include <cstdint>
 #include <tuple>
+#include <type_traits>
 
 std::string decimal_to_ip(int64_t decimal_ip) {
 
@@ -47,41 +48,53 @@ struct print_ip {
 	template <
 		template <typename> typename Container,
 		typename Type,
-		typename = std::enable_if_t<
+			typename = std::enable_if_t<
 			std::is_same_v<Container<Type>, std::vector<Type>> ||
-			std::is_same_v<Container<Type>, std::list<Type>>
+			std::is_same_v<Container<Type>, std::list<Type>> ||
+			std::is_same_v<Container<Type>, std::string> 
 									>
 		>
 	print_ip(const Container<Type> &container) 
 	{
-     for (auto iter = std::begin(container); iter != std::end(container); ++iter) {
-		if (iter != std::begin(container)) std::cout << ".";
-			std::cout << *iter;
-	}
-	std::cout << std::endl;
-	};
-	
-	print_ip(std::string &&value)     
-	{
-		std::cout << value << std::endl;
+    	for (auto iter = std::begin(container); iter != std::end(container); ++iter) {
+			if (!std::is_same_v<Container<Type>, std::string>)
+				if (iter != std::begin(container)) std::cout << ".";	
+					std::cout << *iter;
+		}
+		std::cout << std::endl;
 	};
 
-	print_ip(int64_t &&value)     
+	template<
+		typename T,
+		typename = std::enable_if_t<
+			std::is_same_v<T, int8_t> ||
+			std::is_same_v<T, int16_t> ||
+			std::is_same_v<T, int32_t> ||
+			std::is_same_v<T, int64_t>
+									>
+		> 
+	print_ip(const T &value)
 	{
 		if(value == -1) {
-			m_value = "255";
+		m_value = "255";
 		}
 		else
 		m_value = decimal_to_ip(value);
 		std::cout << m_value << std::endl;
-	};
+	}
 
-	print_ip(std::tuple<int,int,int,int> &&value)      
+		template <
+		template <typename> typename Container,
+		typename... Type,
+		typename = std::enable_if_t<
+			std::is_same_v<Container<Type...>, std::tuple<int,int,int,int>>
+									>
+		>
+	print_ip(const Container<Type...> &container)
 	{
-		std::apply([](auto &... x){(..., static_cast<void>(std::cout << x << "."));}, value);
+		std::apply([](auto &... x){(..., static_cast<void>(std::cout << x << "."));}, container);
 		std::cout << std::endl;
 	};
-
 	private:
 	std::string m_value;
 };
@@ -91,9 +104,7 @@ print_ip( int8_t{-1} ); // 255
 print_ip( int16_t{0} ); // 0.0 
 print_ip( int32_t {2130706433} ); // 127.0.0.1 
 print_ip( int64_t{8875824491850138409} );// 123.45.67.89.101.112.131.41 
-
 print_ip( std::string{"Hello, World!"} ); // Hello, World! 
-//
 print_ip( std::vector<int>{100, 200, 300, 400} ); // 100.200.300.400 
 print_ip( std::list<short>{400, 300, 200, 100} ); // 400.300.200.100 
 print_ip( std::make_tuple(123, 456, 789, 0) ); // 123.456.789.0
