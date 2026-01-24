@@ -12,14 +12,14 @@ std::string decimal_to_ip(int64_t decimal_ip) {
 	int count = std::__popcount(decimal_ip);
 	std::string ss;
 	if (count > 8) {
-		int8_t byte1 = (decimal_ip >> 56) & 0xFF;
-		int8_t byte2 = (decimal_ip >> 48) & 0xFF;
-		int8_t byte3 = (decimal_ip >> 40) & 0xFF;
-		int8_t byte4 = (decimal_ip >> 32) & 0xFF;
-		int8_t byte5 = (decimal_ip >> 24) & 0xFF;
-		int8_t byte6 = (decimal_ip >> 16) & 0xFF;
-		int8_t byte7 = (decimal_ip >> 8) & 0xFF;
-		int8_t byte8 = decimal_ip & 0xFF;
+		unsigned int byte1 = (decimal_ip >> 56) & 0xFF;
+		unsigned int byte2 = (decimal_ip >> 48) & 0xFF;
+		unsigned int byte3 = (decimal_ip >> 40) & 0xFF;
+		unsigned int byte4 = (decimal_ip >> 32) & 0xFF;
+		unsigned int byte5 = (decimal_ip >> 24) & 0xFF;
+		unsigned int byte6 = (decimal_ip >> 16) & 0xFF;
+		unsigned int byte7 = (decimal_ip >> 8) & 0xFF;
+		unsigned int byte8 = decimal_ip & 0xFF;
 
 		ss = std::to_string(byte1)+"." 
 		+ std::to_string(byte2)+ "." 
@@ -31,10 +31,10 @@ std::string decimal_to_ip(int64_t decimal_ip) {
 		+ std::to_string(byte8);
 	}
 	else{
-		int8_t byte1 = (decimal_ip >> 24) & 0xFF;
-		int8_t byte2 = (decimal_ip >> 16) & 0xFF;
-		int8_t byte3 = (decimal_ip >> 8) & 0xFF;
-		int8_t byte4 = decimal_ip & 0xFF;
+		unsigned int byte1 = (decimal_ip >> 24) & 0xFF;
+		unsigned int byte2 = (decimal_ip >> 16) & 0xFF;
+		unsigned int byte3 = (decimal_ip >> 8) & 0xFF;
+		unsigned int byte4 = decimal_ip & 0xFF;
 
 		ss = std::to_string(byte1)+"." 
 		+ std::to_string(byte2)+ "." 
@@ -80,8 +80,21 @@ struct print_ip {
 		}
 		else
 		m_value = decimal_to_ip(value);
-		std::cout << m_value << std::endl;
+		if((value == 0)) std::cout << m_value.substr(2, 3) << std::endl;
+		else std::cout << m_value << std::endl;
 	}
+
+template <typename T>
+void printElem(const T& x, int i) {
+    std::cout << x;
+	if (i!=3) std::cout << '.';
+};
+
+template <typename TupleT, std::size_t... Is>
+void printTupleManual(const TupleT& tp) {
+    (printElem(std::get<Is>(tp),Is), ...);
+	std::cout << std::endl;
+}
 
 		template <
 		template <typename> typename Container,
@@ -92,8 +105,7 @@ struct print_ip {
 		>
 	print_ip(const Container<Type...> &container)
 	{
-		std::apply([](auto &... x){(..., static_cast<void>(std::cout << x << "."));}, container);
-		std::cout << std::endl;
+		printTupleManual<decltype(container), 0, 1, 2, 3>(container);
 	};
 	private:
 	std::string m_value;
