@@ -1,28 +1,40 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
-
-on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["otus-cpp"]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
-jobs:
-  # Single deploy job since we're just deploying
+language: cpp
+compiler: gcc
+os:
+  - linux
+dist: trusty
+sudo: false
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+before_install:
+  - eval "${MATRIX_EVAL}"
+install:
+  - sudo apt-get install -qq doxygen graphviz
+before_script:
+  - echo "deb http://archive.ubuntu.com/ubuntu xenial main universe" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-get update -qq
+script:
+  - cmake .
+  - cmake --build .
+after_success:
+  # Generate the docs only if master, and the TRAVIS_BUILD_DOCS is not zero
+  - >-
+    if [[ "$TRAVIS_BRANCH" = "master" && -n "$TRAVIS_BUILD_DOCS" ]] ; then
+      cd $TRAVIS_BUILD_DIR
+      echo 'Generating Doxygen code documentation...'
+      # Redirect both stderr and stdout to the log file AND the console.
+      doxygen doc/Doxyfile 2>&1 | tee doxygen.log
+    fi
 deploy:
   - provider: pages
     skip-cleanup: true
