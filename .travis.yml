@@ -40,6 +40,6 @@ deploy:
     skip-cleanup: true
     github-token: $GITHUB_TOKEN
     keep-history: true
-    local-dir: doc/html
+    local-dir: docs/html
     on:
       branch: master
