@@ -29,7 +29,6 @@ script:
 after_success:
   # Generate the docs only if master, and the TRAVIS_BUILD_DOCS is not zero
   - >-
-    if [[ true ]] ; then
     if [[ "$TRAVIS_BRANCH" = "master" && -n "$TRAVIS_BUILD_DOCS" ]] ; then
       cd $TRAVIS_BUILD_DIR
       echo 'Generating Doxygen code documentation...'
